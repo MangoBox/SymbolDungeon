@@ -33,6 +33,7 @@ bg_color = 0, 0, 0
 
 #ENEMIES
 enemies = []
+enemies_killed = 0
 
 #PLAYER PARAMETERS
 pl_pos = [0,0]
@@ -40,7 +41,7 @@ start_time = time.time()
 curHealth = 10
 maxHealth = 10
 level = 1
-#0 = title screen, 1 = playing
+#0 = title screen, 1 = playing, 2 = game over
 game_state = 0
 
 #INVENTORY
@@ -263,7 +264,7 @@ def loop_dungeon_gameMechanics():
 	#HANDLES
 	#-----------------------------------------
 	pos = ()
-	global game_state, pl_pos, enemies, cur_item, curHealth, maxHealth, level
+	global game_state, pl_pos, enemies, cur_item, curHealth, maxHealth, level, enemies_killed
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
@@ -274,8 +275,10 @@ def loop_dungeon_gameMechanics():
 				#Using a sword
 				if typ == "sword":
 					rad = 2 if getCurrentItemName() == "Integro" else 1
+					old_len = len(enemies)
 					available_ens = [e for e in enemies if e[0] >= pl_pos[0] - rad and e[0] <= pl_pos[0] + rad and e[1] >= pl_pos[1] - rad and e[1] <= pl_pos[1] + rad]
 					enemies = [x for x in enemies if x not in available_ens]
+					enemies_killed += old_len - len(enemies)
 					if getCurrentItemName() == "Totaler" and random.random() < 0.3:
 						healPlayer(1)
 					continue
@@ -296,6 +299,7 @@ def loop_dungeon_gameMechanics():
 							to_remove.append(e)
 					for e in to_remove:
 						enemies.remove(e)
+						enemies_killed += 1
 					inventory.remove(inventory[cur_item])
 
 			#Quit the game
@@ -381,7 +385,7 @@ def loop_dungeon_gameMechanics():
 
 						if not hurtPlayer(dmg):
 							#PLAYER DIES
-							game_state = 0
+							game_state = 2
 						break
 
 		#FINDING CHEST
@@ -441,9 +445,10 @@ def loop_dungeon_renderGraphics():
 				txt = "♜"
 
 				#rendering item
-				item = inventory[cur_item]
-				icon_txt = myfont.render(item.icon, True, item.color)
-				screen.blit(icon_txt, (x*cellSize + 15, y*cellSize + 10))
+				if cur_item < len(inventory) or cur_item >= 0:
+					item = inventory[cur_item]
+					icon_txt = myfont.render(item.icon, True, item.color)
+					screen.blit(icon_txt, (x*cellSize + 15, y*cellSize + 10))
 
 			#If rendering block on screen
 			if grid[x][y] != None and not isEnemy and not isPlayer:
@@ -552,6 +557,32 @@ def loop_mainMenu():
 	text_rect = title_text.get_rect(center=(screen_dim[0]/2,screen_dim[1]/2))
 	screen.blit(title_text, text_rect)
 
+def loop_gameOverMenu():
+	global game_state, level, enemies_killed
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			sys.exit()
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_SPACE:
+				game_state = 0
+
+	#GAME OVER
+	title_font = pygame.font.Font("Arial-Unicode-MS_4302.ttf",50)
+	offset_y = -math.cos(getTime()*1.5+1203) * 5
+	title_text = title_font.render("GAME OVER", False, (255,0,0,255))
+	text_rect = title_text.get_rect(center=(screen_dim[0]/2,screen_dim[1]/2+offset_y))
+	screen.blit(title_text, text_rect)
+
+	title_font = pygame.font.Font("Arial-Unicode-MS_4302.ttf",15)
+	title_text = title_font.render("You reached level {0} and killed {1} enemies!".format(level, enemies_killed), False, (255,255,255,150))
+	text_rect = title_text.get_rect(center=(screen_dim[0]/2,screen_dim[1]/2+40))
+	screen.blit(title_text, text_rect)
+
+	title_font = pygame.font.Font("Arial-Unicode-MS_4302.ttf",15)
+	title_text = title_font.render("Press space to go to main menu.".format(level), False, (255,255,255,150))
+	text_rect = title_text.get_rect(center=(screen_dim[0]/2,screen_dim[1]/2+55))
+	screen.blit(title_text, text_rect)
+
 #The primary loop for dungeon code.
 def loop_dungeon():
 	loop_dungeon_gameMechanics()	
@@ -568,6 +599,8 @@ def startGame():
 			loop_mainMenu()
 		if game_state == 1:
 			loop_dungeon()
+		if game_state == 2:
+			loop_gameOverMenu()
 
 		#Writes changes to graphics buffer
 		pygame.display.flip()
