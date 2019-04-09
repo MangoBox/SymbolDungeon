@@ -376,7 +376,8 @@ def loop_dungeon_gameMechanics():
 						if getCurrentItemName() == "Squaro":
 							enemies.remove(random.choice(enemies))
 						addDescriptionTitle("An enemy hit you! (-{0} HP)".format(dmg))
-						enemies.remove(e)
+						if e in enemies:
+							enemies.remove(e)
 
 						if not hurtPlayer(dmg):
 							#PLAYER DIES
