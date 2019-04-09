@@ -1,0 +1,3 @@
+import symboldungeon
+
+symboldungeon.startGame()
