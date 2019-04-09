@@ -455,8 +455,13 @@ def loop_dungeon_renderGraphics():
 				txt = "♜"
 
 				#rendering item
-				if cur_item < len(inventory) or cur_item >= 0:
+				item = None
+				passer = False
+				try:
 					item = inventory[cur_item]
+				except IndexError:
+					passer = True
+				if not passer:
 					icon_txt = myfont.render(item.icon, True, item.color)
 					screen.blit(icon_txt, (x*cellSize + 15, y*cellSize + 10))
 
