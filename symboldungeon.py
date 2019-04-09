@@ -518,12 +518,16 @@ def loop_dungeon_renderUI():
 	screen.blit(inventory_line, (grid_dim[1] * cellSize + 5, title_area_height + health_area_height + 	40 + len(inventory) * 30))
 		
 	#Renders current item description. Lets user know what item does.
-	cur_i = inventory[cur_item]
-	description_font = pygame.font.Font("Arial-Unicode-MS_4302.ttf",14)
-	for i in range(len(cur_i.description)):
-		d_str = cur_i.description[i]
-		inventory_item = description_font.render(d_str, True, (255,255,255,255))
-		screen.blit(inventory_item, (grid_dim[1] * cellSize + 5, title_area_height + health_area_height + 60 + len(inventory) * 30 + i * 20))
+	try:
+		cur_i = inventory[cur_item]
+		description_font = pygame.font.Font("Arial-Unicode-MS_4302.ttf",14)
+		for i in range(len(cur_i.description)):
+			d_str = cur_i.description[i]
+			inventory_item = description_font.render(d_str, True, (255,255,255,255))
+			screen.blit(inventory_item, (grid_dim[1] * cellSize + 5, title_area_height + health_area_height + 60 + len(inventory) * 30 + i * 20))
+	except IndexError:
+		pass
+	
 
 	#Subtitle text to help user know controls.
 	sub_text = description_font.render("| WASD to move | Space: Use Item | Backspace: Delete Item | <>: Switch Item | Esc: Quit Game |", True, (170,170,170,255))
