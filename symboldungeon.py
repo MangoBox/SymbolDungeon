@@ -238,13 +238,23 @@ def healPlayer(amount):
 
 #Resets all parameters of the game.
 def resetGame():
-	global curHealth, maxHealth, level
+	global curHealth, maxHealth, level, enemies_killed
 	curHealth = maxHealth
-	level = 1
+	enemies_killed = 0
 	inventory.clear()
+	enemies.clear()
 	initGrid()
 	generateEnemies()
 	generateItems()
+
+	#PLAYER PARAMETERS
+	pl_pos = [0,0]
+	start_time = time.time()
+	curHealth = 10
+	maxHealth = 10
+	level = 1
+	#0 = title screen, 1 = playing, 2 = game over
+	game_state = 0
 
 	#Adds the standard Parablade sword to the players inventory.
 	inventory.append(items[0])
@@ -523,8 +533,8 @@ def loop_mainMenu():
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
 				#play
-				game_state = 1
 				resetGame()
+				game_state = 1
 				
 			if event.key == pygame.K_ESCAPE:
 				sys.exit()
